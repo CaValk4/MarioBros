@@ -1,53 +1,74 @@
-import { Redirect, Route } from 'react-router-dom';
-import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
-import Home from './pages/Home';
+import React, { useEffect, useState } from 'react';
+import './pages/Home.css';
+import pipe from './theme/assets/pipe.png';
+import marioGif from './theme/assets/mario.gif';
+import marioGameOver from './theme/assets/game-over.png';
+import cr7C from './theme/assets/cr7C.jpg';
+import clouds from './theme/assets/clouds.png';
+import sii from './theme/songs/sii.mp3';
 
-/* Core CSS required for Ionic components to work properly */
-import '@ionic/react/css/core.css';
 
-/* Basic CSS for apps built with Ionic */
-import '@ionic/react/css/normalize.css';
-import '@ionic/react/css/structure.css';
-import '@ionic/react/css/typography.css';
+const Home: React.FC = () => {
 
-/* Optional CSS utils that can be commented out */
-import '@ionic/react/css/padding.css';
-import '@ionic/react/css/float-elements.css';
-import '@ionic/react/css/text-alignment.css';
-import '@ionic/react/css/text-transformation.css';
-import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
+  const [gameOver, setGameOver] = useState<boolean>(false);
+  useEffect(() => {
+    const clouds = document.querySelector('.clouds') as HTMLElement;
+    const marioElement = document.querySelector('.mario') as HTMLElement;
+    const sii = document.getElementById('sii') as HTMLElement;
+    const pipeElement = document.querySelector('.pipe') as HTMLElement;
+    const careca = document.querySelector('.careca') as HTMLElement;
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+    const jump = () => {
+      marioElement.classList.add('jump');
 
-/* import '@ionic/react/css/palettes/dark.always.css'; */
-/* import '@ionic/react/css/palettes/dark.class.css'; */
-import '@ionic/react/css/palettes/dark.system.css';
+      setTimeout(() => {
+        marioElement.classList.remove('jump');
+      }, 1000);
+    }
 
-/* Theme variables */
-import './theme/variables.css';
+    const loop = setInterval(() => {
+      const pipePosition = pipeElement.offsetLeft;
+      const marioPosition = +window.getComputedStyle(marioElement).bottom.replace('px', '');
+      
 
-setupIonicReact();
+      if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
+        clearInterval(loop);
+        setGameOver(true);
+        pipeElement.style.animation = 'none';
+        pipeElement.style.left = '75px';
+        marioElement.style.animation = 'none';
+        marioElement.setAttribute('src', marioGameOver);
+        marioElement.style.width = '75px';
+        marioElement.style.marginLeft = '50px';
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+        
+        clouds.style.animation = 'none';
 
-export default App;
+
+
+        return;
+      }
+
+    }, 10);
+
+    document.addEventListener('keydown', jump);
+
+    return () => {
+      clearInterval(loop);
+      document.removeEventListener('keydown', jump);
+    };
+  }, []);
+
+  return (
+    <div className="game-board">
+      <img src={clouds} className="clouds" alt="clouds" />
+      <img src={cr7C} className="careca" alt="careca" />
+      <img src={marioGif} className="mario" alt="mario" />
+      <img src={pipe} className="pipe" alt="pipe" />
+      <audio src={sii} className='sii'></audio>
+      {gameOver && <div className="game-over-text">GAME OVER</div>}
+    </div>
+  );
+}
+
+export default Home;
